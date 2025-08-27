@@ -1,6 +1,7 @@
 <?php
 require 'db.php';
 require 'validation.php';
+require 'Product.php';
 
 $errors = [];
 $message = "";
@@ -19,16 +20,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     ]);
 
     if (empty($errors)) {
-        $sql = "INSERT INTO products_with_email (name, email, price, category_id)
-                VALUES (:name, :email, :price, :category_id)";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute([
-            ':name' => $name,
-            ':email' => $email,
-            ':price' => $price,
-            ':category_id' => $category_id ?: null
-        ]);
-
+        $product = new Product($conn, $name, $price, $category_id, $email);
+        $product->addProduct();
         $message = "✅ Product added successfully!";
         $name = $price = $category_id = $email = "";
     }

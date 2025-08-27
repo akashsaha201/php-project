@@ -1,11 +1,9 @@
 <?php
 require 'db.php'; 
+require 'Product.php';
 
 // Fetch products with category name
-$sql = "SELECT p.id, p.name, p.email, p.price, c.name AS category 
-        FROM products_with_email p
-        LEFT JOIN categories c ON p.category_id = c.id";
-$products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+$products = Product::getAll($conn)
 ?>
 
 <!DOCTYPE html>

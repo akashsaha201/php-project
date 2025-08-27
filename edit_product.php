@@ -1,6 +1,7 @@
 <?php
 require 'db.php';
 require 'validation.php';
+require 'Product.php';
 
 $id = $_GET['id'] ?? null;
 if (!$id) die("Invalid ID");
@@ -9,9 +10,7 @@ $errors = [];
 $message = "";
 
 // Fetch product
-$stmt = $conn->prepare("SELECT * FROM products_with_email WHERE id = :id");
-$stmt->execute([':id' => $id]);
-$product = $stmt->fetch(PDO::FETCH_ASSOC);
+$product = Product::getById($conn, $id);
 if (!$product) die("Product not found");
 
 // Form submission
@@ -29,22 +28,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     ]);
 
     if (empty($errors)) {
-        $sql = "UPDATE products_with_email 
-                SET name=:name, email=:email, price=:price, category_id=:category_id 
-                WHERE id=:id";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute([
-            ':name' => $name,
-            ':email' => $email,
-            ':price' => $price,
-            ':category_id' => $category_id ?: null,
-            ':id' => $id
-        ]);
+        $product = new Product($conn, $name, $price, $category_id, $email, $id);
+        $product->updateProduct();
 
         $message = "✅ Product updated successfully!";
-        $stmt = $conn->prepare("SELECT * FROM products_with_email WHERE id = :id");
-        $stmt->execute([':id' => $id]);
-        $product = $stmt->fetch(PDO::FETCH_ASSOC);
+        $product = Product::getById($conn, $id);
     }
 }
 
