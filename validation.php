@@ -30,23 +30,92 @@ function validateEmail($email) {
     return null;
 }
 
-/**
- * Validate all product fields at once
- */
+function validateWeight($weight) {
+    if ($weight === "" || $weight === null) {
+        return "Weight is required for physical products.";
+    }
+    if (!is_numeric($weight) || $weight <= 0) {
+        return "Weight must be a positive number.";
+    }
+    return null;
+}
+
+function validateShippingCost($cost) {
+    if ($cost === "" || $cost === null) {
+        return "Shipping cost is required for physical products.";
+    }
+    if (!is_numeric($cost) || $cost < 0) {
+        return "Shipping cost must be a valid non-negative number.";
+    }
+    return null;
+}
+
+function validateDownloadLink($link) {
+    if ($link === "" || $link === null) {
+        return "Download link is required for digital products.";
+    }
+    if (!filter_var($link, FILTER_VALIDATE_URL)) {
+        return "Download link must be a valid URL.";
+    }
+    return null;
+}
+
+function validateFileSize($size) {
+    if ($size === "" || $size === null) {
+        return "File size is required for digital products.";
+    }
+    if (!is_numeric($size) || $size <= 0) {
+        return "File size must be a positive number.";
+    }
+    return null;
+}
+
+function validateType($type) {
+    if ($type === "" || $type === null) {
+        return "Product type is required.";
+    }
+    if (!in_array($type, ["physical", "digital"])) {
+        return "Invalid product type.";
+    }
+    return null;
+}
+
 function validateProduct($data) {
     $errors = [];
 
+    // Common fields
     if ($error = validateName($data['name'] ?? "")) {
         $errors['name'] = $error;
     }
-
     if ($error = validatePrice($data['price'] ?? "")) {
         $errors['price'] = $error;
     }
-
     if ($error = validateEmail($data['email'] ?? "")) {
         $errors['email'] = $error;
+    }
+    if ($error = validateType($data['type'] ?? "")) {
+        $errors['type'] = $error;
+    }
+
+    // Conditional fields
+    $type = $data['type'] ?? "";
+
+    if ($type === "physical") {
+        if ($error = validateWeight($data['weight'] ?? "")) {
+            $errors['weight'] = $error;
+        }
+        if ($error = validateShippingCost($data['shipping_cost'] ?? "")) {
+            $errors['shipping_cost'] = $error;
+        }
+    } elseif ($type === "digital") {
+        if ($error = validateDownloadLink($data['download_link'] ?? "")) {
+            $errors['download_link'] = $error;
+        }
+        if ($error = validateFileSize($data['file_size'] ?? "")) {
+            $errors['file_size'] = $error;
+        }
     }
 
     return $errors;
 }
+

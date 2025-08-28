@@ -1,55 +1,46 @@
 <?php
 class Product
 {
-    public $id;
-    public $name;
-    public $price;
-    public $category_id;
-    public $email;
-    public $conn;
+    protected $id;
+    protected $name;
+    protected $price;
+    protected $category_id;
+    protected $email;
+    protected $conn;
 
-     public function __construct(PDO $conn, $name, $price, $category_id, $email, $id = null) {
+    public function __construct(PDO $conn, $name, $price, $category_id, $email, $id = null) {
         $this->conn = $conn;
-        $this->id = $id; 
+        $this->id = $id;
         $this->name = $name;
         $this->price = $price;
         $this->category_id = $category_id;
         $this->email = $email;
     }
 
-     public function addProduct() {
-        $sql = "INSERT INTO products_with_email (name, email, price, category_id) 
-                VALUES (:name, :email, :price, :category_id)";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute([
-            ':name' => $this->name,
-            ':email' => $this->email,
-            ':price' => $this->price,
-            ':category_id' => $this->category_id ?: null
-        ]);
-    }
+    // Getters and Setters
+    public function getId() { return $this->id; }
+    public function setId($id) { $this->id = $id; }
 
-    public function updateProduct() {
-        if (!$this->id) return false;
-        $sql = "UPDATE products_with_email 
-                SET name=:name, email=:email, price=:price, category_id=:category_id 
-                WHERE id=:id";
-        $stmt = $this->conn->prepare($sql);
-        return $stmt->execute([
-            ':name' => $this->name,
-            ':email' => $this->email,
-            ':price' => $this->price,
-            ':category_id' => $this->category_id ?: null,
-            ':id' => $this->id
-        ]);
-    }
+    public function getName() { return $this->name; }
+    public function setName($name) { $this->name = $name; }
 
+    public function getPrice() { return $this->price; }
+    public function setPrice($price) { $this->price = $price; }
+
+    public function getCategoryId() { return $this->category_id; }
+    public function setCategoryId($category_id) { $this->category_id = $category_id; }
+
+    public function getEmail() { return $this->email; }
+    public function setEmail($email) { $this->email = $email; }
+
+    // Common delete method
     public function deleteProduct() {
-    if (!$this->id) return false; 
-    $stmt = $this->conn->prepare("DELETE FROM products_with_email WHERE id = :id");
-    return $stmt->execute([':id' => $this->id]);
+        if (!$this->id) return false;
+        $stmt = $this->conn->prepare("DELETE FROM products_with_email WHERE id = :id");
+        return $stmt->execute([':id' => $this->id]);
     }
 
+    // Common static methods
     public static function getById(PDO $conn, $id) {
         $stmt = $conn->prepare("SELECT * FROM products_with_email WHERE id = :id");
         $stmt->execute([':id' => $id]);
@@ -57,11 +48,10 @@ class Product
     }
 
     public static function getAll(PDO $conn) {
-        $sql = "SELECT p.id, p.name, p.email, p.price, c.name AS category 
+        $sql = "SELECT p.*, c.name AS category 
                 FROM products_with_email p
-                LEFT JOIN categories c ON p.category_id = c.id";
+                LEFT JOIN categories c ON p.category_id = c.id
+                ORDER BY p.id";
         return $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
-
 }
-?>

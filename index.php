@@ -1,9 +1,9 @@
 <?php
-require 'db.php'; 
+require 'db.php';
 require 'Product.php';
 
-// Fetch products with category name
-$products = Product::getAll($conn)
+// Fetch products
+$products = Product::getAll($conn);
 ?>
 
 <!DOCTYPE html>
@@ -27,38 +27,53 @@ $products = Product::getAll($conn)
             <table class="table table-striped table-bordered align-middle">
                 <thead class="table-dark">
                     <tr>
-                        <th scope="col">#ID</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">Email</th>
-                        <th scope="col">Price ($)</th>
-                        <th scope="col">Category</th>
-                        <th scope="col" style="width: 150px;">Actions</th>
+                        <th>#ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Type</th>
+                        <th>Price ($)</th>
+                        <th>Category</th>
+                        <th>Details</th>
+                        <th style="width: 150px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if ($products): ?>
                         <?php foreach ($products as $product): ?>
                             <tr>
-                                <td><?php echo $product['id']; ?></td>
-                                <td><?php echo htmlspecialchars($product['name']); ?></td>
-                                <td><?php echo htmlspecialchars($product['email']); ?></td>
-                                <td><?php echo number_format($product['price'], 2); ?></td>
-                                <td><?php echo $product['category'] ?? 'Uncategorized'; ?></td>
-                                <td class="d-flex gap-2">
-                                    <a href="edit_product.php?id=<?php echo $product['id']; ?>"
-                                        class="btn btn-sm btn-primary">Edit</a>
-
-                                    <a href="delete_product.php?id=<?php echo $product['id']; ?>" class="btn btn-sm btn-danger"
-                                        onclick="return confirm('Are you sure you want to delete this product?');">
-                                        Delete
-                                    </a>
+                                <td><?= $product['id']; ?></td>
+                                <td><?= htmlspecialchars($product['name']); ?></td>
+                                <td><?= htmlspecialchars($product['email']); ?></td>
+                                <td class="fw-bold text-capitalize"><?= $product['product_type']; ?></td>
+                                <td><?= number_format($product['price'], 2); ?></td>
+                                <td><?= $product['category'] ?? 'Uncategorized'; ?></td>
+                                <td>
+                                    <?php if ($product['product_type'] === 'physical'): ?>
+                                        Weight: <?= $product['weight'] ?> kg<br>
+                                        Shipping: $<?= $product['shipping_cost']; ?>
+                                    <?php elseif ($product['product_type'] === 'digital'): ?>
+                                        File: <?= $product['file_size'] ?> MB<br>
+                                        <a href="<?= htmlspecialchars($product['download_link']); ?>" target="_blank">
+                                            Download
+                                        </a>
+                                    <?php else: ?>
+                                        <em>No details</em>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <a href="edit_product.php?id=<?= $product['id']; ?>"
+                                            class="btn btn-sm btn-primary">Edit</a>
+                                        <a href="delete_product.php?id=<?= $product['id']; ?>" class="btn btn-sm btn-danger"
+                                            onclick="return confirm('Are you sure you want to delete this product?');">Delete</a>
+                                    </div>
                                 </td>
 
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="6" class="text-center text-muted">No products found.</td>
+                            <td colspan="8" class="text-center text-muted">No products found.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
