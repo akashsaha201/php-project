@@ -1,61 +1,92 @@
 <?php
+// ==========================
+// Dependencies
+// ==========================
 require 'db.php';
 require 'validation.php';
 require 'PhysicalProduct.php';
 require 'DigitalProduct.php';
 
+// ==========================
+// Validate ID
+// ==========================
 $id = $_GET['id'] ?? null;
-if (!$id) die("Invalid ID");
+if (!$id) {
+    die("❌ Invalid product ID");
+}
 
+// ==========================
+// Initialize
+// ==========================
 $errors = [];
 $message = "";
 
-// Fetch product
+// ==========================
+// Fetch Product Data
+// ==========================
 $product = Product::getById($conn, $id);
-if (!$product) die("Product not found");
+if (!$product) {
+    die("❌ Product not found");
+}
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $name = trim($_POST['name']);
-    $price = trim($_POST['price']);
-    $category_id = isset($_POST['category_id']) && $_POST['category_id'] !== '' 
-    ? trim($_POST['category_id']) 
-    : null;
-    $email = trim($_POST['email']);
-    $type = trim($_POST['type']);
+// ==========================
+// Handle Form Submission
+// ==========================
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    // Sanitize input
+    $name        = trim($_POST['name']);
+    $price       = trim($_POST['price']);
+    $category_id = (!empty($_POST['category_id'])) ? trim($_POST['category_id']) : null;
+    $email       = trim($_POST['email']);
+    $type        = trim($_POST['type']);
 
     // Extra fields
-    $weight = $_POST['weight'] ?? null;
+    $weight        = $_POST['weight'] ?? null;
     $shipping_cost = $_POST['shipping_cost'] ?? null;
     $download_link = $_POST['download_link'] ?? null;
-    $file_size = $_POST['file_size'] ?? null;
+    $file_size     = $_POST['file_size'] ?? null;
 
-    // Validate all
+    // ==========================
+    // Validate Inputs
+    // ==========================
     $errors = validateProduct([
-        'name' => $name,
-        'price' => $price,
-        'email' => $email,
-        'type' => $type,
-        'weight' => $weight,
+        'name'          => $name,
+        'price'         => $price,
+        'email'         => $email,
+        'type'          => $type,
+        'weight'        => $weight,
         'shipping_cost' => $shipping_cost,
         'download_link' => $download_link,
-        'file_size' => $file_size
+        'file_size'     => $file_size
     ]);
 
+    // ==========================
+    // Update Product if Valid
+    // ==========================
     if (empty($errors)) {
         if ($type === "physical") {
-            $productObj = new PhysicalProduct($conn, $name, $price, $category_id, $email, $shipping_cost, $weight, $id);
+            $productObj = new PhysicalProduct(
+                $conn, $name, $price, $category_id, $email,
+                $shipping_cost, $weight, $id
+            );
         } elseif ($type === "digital") {
-            $productObj = new DigitalProduct($conn, $name, $price, $category_id, $email, $file_size, $download_link, $id);
+            $productObj = new DigitalProduct(
+                $conn, $name, $price, $category_id, $email,
+                $file_size, $download_link, $id
+            );
         }
 
         if (isset($productObj)) {
             $productObj->updateProduct();
-            $message = "✅ Product updated successfully!";
-            $product = Product::getById($conn, $id);
+            $message  = "✅ Product updated successfully!";
+            $product  = Product::getById($conn, $id); // Refresh product data
         }
     }
 }
 
+// ==========================
+// Fetch Categories
+// ==========================
 $categories = $conn->query("SELECT * FROM categories")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -72,11 +103,16 @@ $categories = $conn->query("SELECT * FROM categories")->fetchAll(PDO::FETCH_ASSO
     <div class="card shadow p-4">
         <h2 class="mb-4">✏️ Edit Product</h2>
 
+        <!-- Success Message -->
         <?php if ($message): ?>
             <div class="alert alert-success"><?php echo $message; ?></div>
         <?php endif; ?>
 
+        <!-- ==========================
+             Edit Form
+        ========================== -->
         <form method="post">
+            
             <!-- Name -->
             <div class="mb-3">
                 <label class="form-label">Product Name</label>
@@ -106,7 +142,7 @@ $categories = $conn->query("SELECT * FROM categories")->fetchAll(PDO::FETCH_ASSO
                         class="form-select <?php echo isset($errors['type']) ? 'is-invalid' : ''; ?>">
                     <option value="">-- Select Type --</option>
                     <option value="physical" <?php echo (($product['type'] ?? '')=='physical') ? 'selected' : ''; ?>>Physical</option>
-                    <option value="digital" <?php echo (($product['type'] ?? '')=='digital') ? 'selected' : ''; ?>>Digital</option>
+                    <option value="digital"  <?php echo (($product['type'] ?? '')=='digital')  ? 'selected' : ''; ?>>Digital</option>
                 </select>
                 <?php if (isset($errors['type'])): ?>
                     <div class="invalid-feedback"><?php echo $errors['type']; ?></div>
@@ -128,7 +164,7 @@ $categories = $conn->query("SELECT * FROM categories")->fetchAll(PDO::FETCH_ASSO
                 </select>
             </div>
 
-            <!-- DIGITAL -->
+            <!-- DIGITAL Fields -->
             <div id="digitalFields" style="display:none;">
                 <div class="mb-3">
                     <label class="form-label">Download Link</label>
@@ -150,7 +186,7 @@ $categories = $conn->query("SELECT * FROM categories")->fetchAll(PDO::FETCH_ASSO
                 </div>
             </div>
 
-            <!-- PHYSICAL -->
+            <!-- PHYSICAL Fields -->
             <div id="physicalFields" style="display:none;">
                 <div class="mb-3">
                     <label class="form-label">Weight (kg)</label>
@@ -191,11 +227,14 @@ $categories = $conn->query("SELECT * FROM categories")->fetchAll(PDO::FETCH_ASSO
 </div>
 
 <script>
+// Toggle fields based on product type
 function toggleFields() {
     let selectedType = document.getElementById('productType').value;
-    document.getElementById('digitalFields').style.display = (selectedType === "digital") ? "block" : "none";
+
+    document.getElementById('digitalFields').style.display  = (selectedType === "digital")  ? "block" : "none";
     document.getElementById('physicalFields').style.display = (selectedType === "physical") ? "block" : "none";
 
+    // Filter categories by type
     let categorySelect = document.getElementById('categorySelect');
     let options = categorySelect.querySelectorAll('option');
     options.forEach(opt => {
@@ -209,6 +248,7 @@ function toggleFields() {
     });
 }
 
+// Initialize and bind event
 toggleFields();
 document.getElementById('productType').addEventListener('change', toggleFields);
 </script>
