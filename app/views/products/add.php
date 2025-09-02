@@ -17,7 +17,7 @@
 
         <!-- Name -->
         <div class="mb-3">
-            <label class="form-label">Product Name</label>
+            <label class="form-label">Name</label>
             <input type="text" name="name" class="form-control" value="<?php echo $data['form']['name'] ?? ''; ?>">
             <span class="text-danger"><?php echo $data['errors']['name'] ?? ''; ?></span>
         </div>
@@ -32,8 +32,15 @@
         <!-- Price -->
         <div class="mb-3">
             <label class="form-label">Price</label>
-            <input type="number" step="0.01" name="price" class="form-control" value="<?php echo $data['form']['price'] ?? ''; ?>">
+            <input type="number" step="1" name="price" class="form-control" value="<?php echo $data['form']['price'] ?? ''; ?>">
             <span class="text-danger"><?php echo $data['errors']['price'] ?? ''; ?></span>
+        </div>
+        
+        <!-- Quantity -->
+        <div class="mb-3">
+            <label class="form-label">Quantity</label>
+            <input type="number" step="1" name="quantity" class="form-control" value="<?php echo $data['form']['quantity'] ?? ''; ?>">
+            <span class="text-danger"><?php echo $data['errors']['quantity'] ?? ''; ?></span>
         </div>
 
         <!-- Category -->

@@ -60,14 +60,14 @@ class Products extends Controller
             }
 
             // Save product (common part)
-            $product = new Product($_POST['name'], $_POST['email'], $_POST['price'], $_POST['category_id']);
+            $product = new Product($_POST['name'], $_POST['email'], $_POST['price'], $_POST['quantity'], $_POST['category_id']);
             $productId = $this->productRepo->insert($product);
 
             if ($type === 'digital') {
-                $digital = new DigitalProduct($productId, $_POST['name'], $_POST['email'], $_POST['price'], $_POST['category_id'], $_POST['file_size'], $_POST['download_link']);
+                $digital = new DigitalProduct($productId, $_POST['name'], $_POST['email'], $_POST['price'], $_POST['quantity'], $_POST['category_id'], $_POST['file_size'], $_POST['download_link']);
                 $this->digitalRepo->insert($digital);
             } elseif ($type === 'physical') {
-                $physical = new PhysicalProduct($productId, $_POST['name'], $_POST['email'], $_POST['price'], $_POST['category_id'], $_POST['weight'], $_POST['shipping_cost']);
+                $physical = new PhysicalProduct($productId, $_POST['name'], $_POST['email'], $_POST['price'], $_POST['quantity'], $_POST['category_id'], $_POST['weight'], $_POST['shipping_cost']);
                 $this->physicalRepo->insert($physical);
             }
 
@@ -122,15 +122,15 @@ class Products extends Controller
             $product->setName($_POST['name']);
             $product->setEmail($_POST['email']);
             $product->setPrice($_POST['price']);
+            $product->setQuantity($_POST['quantity']);
             $product->setCategoryId($_POST['category_id']);
-            $this->productRepo->update($product);
 
             // Update child table
             if ($type === 'digital') {
-                $digital = new DigitalProduct($id, $_POST['name'], $_POST['email'], $_POST['price'], $_POST['category_id'], $_POST['file_size'], $_POST['download_link']);
+                $digital = new DigitalProduct($id, $_POST['name'], $_POST['email'], $_POST['price'], $_POST['quantity'], $_POST['category_id'], $_POST['file_size'], $_POST['download_link']);
                 $this->digitalRepo->update($digital);
             } elseif ($type === 'physical') {
-                $physical = new PhysicalProduct($id, $_POST['name'], $_POST['email'], $_POST['price'], $_POST['category_id'], $_POST['weight'], $_POST['shipping_cost']);
+                $physical = new PhysicalProduct($id, $_POST['name'], $_POST['email'], $_POST['price'], $_POST['quantity'], $_POST['category_id'], $_POST['weight'], $_POST['shipping_cost']);
                 $this->physicalRepo->update($physical);
             }
 

@@ -20,10 +20,18 @@ function validateProductCommon( $data) {
 
     // Price
     $price = $data['price'] ?? '';
-    if (empty($price)) {
+    if ($price === '') {
         $errors['price'] = 'Please enter price';
     }elseif (!is_numeric($price) || $price <= 0) {
         $errors['price'] = "Price must be a positive number.";
+    }
+    
+    // Quantity
+    $quantity = $data['quantity'] ?? '';
+    if ($quantity === '') {
+        $errors['quantity'] = 'Please enter quantity';
+    } elseif (!is_numeric($quantity) || $quantity < 0) {
+        $errors['quantity'] = "Quantity cannot be negative.";
     }
 
     // Category

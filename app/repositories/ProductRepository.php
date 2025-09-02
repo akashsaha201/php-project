@@ -10,11 +10,12 @@ class ProductRepository
 
     public function insert(Product $product): int
     {
-        $this->db->query("INSERT INTO products (name, email, price, category_id) 
-                          VALUES (:name, :email, :price, :category_id)");
+        $this->db->query("INSERT INTO products (name, email, price, quantity, category_id) 
+                          VALUES (:name, :email, :price, :quantity, :category_id)");
         $this->db->bind(':name', $product->getName());
         $this->db->bind(':email', $product->getEmail());
         $this->db->bind(':price', $product->getPrice());
+        $this->db->bind(':quantity', $product->getQuantity());
         $this->db->bind(':category_id', $product->getCategoryId());
         $this->db->execute();
 
@@ -24,12 +25,13 @@ class ProductRepository
     public function update(Product $product): bool
     {
         $this->db->query("UPDATE products SET name = :name, email = :email, 
-                          price = :price, category_id = :category_id
+                          price = :price, quantity = :quantity, category_id = :category_id
                           WHERE id = :id");
         $this->db->bind(':id', $product->getId());
         $this->db->bind(':name', $product->getName());
         $this->db->bind(':email', $product->getEmail());
         $this->db->bind(':price', $product->getPrice());
+        $this->db->bind(':quantity', $product->getQuantity());
         $this->db->bind(':category_id', $product->getCategoryId());
 
         return $this->db->execute();
@@ -49,6 +51,7 @@ class ProductRepository
             p.name, 
             p.email, 
             p.price, 
+            p.quantity,
             c.name AS category_name, 
             c.type AS category_type,
             d.file_size, 
@@ -59,7 +62,7 @@ class ProductRepository
         JOIN categories c ON p.category_id = c.id
         LEFT JOIN digital_products d ON p.id = d.product_id
         LEFT JOIN physical_products ph ON p.id = ph.product_id
-        ORDER BY p.id DESC
+        ORDER BY p.name
     ");
         return $this->db->resultSet();
     }
@@ -76,11 +79,12 @@ class ProductRepository
         }
 
         return new Product(
-            $row['id'],
             $row['name'],
             $row['email'],
             $row['price'],
-            $row['category_id']
+            $row['quantity'],
+            $row['category_id'],
+            $row['id']
         );
     }
 

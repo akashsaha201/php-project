@@ -23,6 +23,14 @@
                     <a class="nav-link" href="<?php echo URLROOT; ?>/products"><?php echo isAdmin() ? 'Product Management' : 'Products';?></a>
                 </li>
                 <?php endif; ?>
+                <?php if(isLoggedIn() && !isAdmin()): ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php echo URLROOT; ?>/cart">
+                            🛒 Cart (<?php echo isset($_SESSION['cart']) ? array_sum(array_column($_SESSION['cart'], 'quantity')) : 0; ?>)
+                        </a>
+                    </li>
+                <?php endif; ?>
+
                 <li class="nav-item">
                     <a class="nav-link" href="<?php echo URLROOT; ?>/pages/about">About</a>
                 </li>

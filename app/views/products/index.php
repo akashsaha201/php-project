@@ -8,7 +8,7 @@
     <?php if(isLoggedIn() && isAdmin()): ?>
     <a href="<?php echo URLROOT; ?>/products/add" class="btn btn-primary mb-3">Add Product</a>
     <?php endif; ?>
-    <table class="table table-bordered table-striped">
+    <table class="table table-bordered table-striped text-center align-middle">
     <thead class="table-dark">
         <tr>
             <th>ID</th>
@@ -18,7 +18,10 @@
             <th>Type</th>
             <th>Category</th>
             <th>Details</th>
-            <?php if(isLoggedIn() && isAdmin()): ?>
+            <?php if(isLoggedIn() && !isAdmin()): ?>
+            <th>Buy</th>
+            <?php elseif(isLoggedIn() && isAdmin()): ?>
+            <th>Stock</th>
             <th>Actions</th>
             <?php endif; ?>
         </tr>
@@ -44,7 +47,21 @@
                         N/A
                     <?php endif; ?>
                 </td>
-                <?php if(isLoggedIn() && isAdmin()): ?>
+                <?php if(isLoggedIn() && !isAdmin()): ?>
+                    <td>
+                        <span style="color: <?php echo $product['quantity'] > 0 ? 'green' : 'red'; ?>">
+                            <?php echo htmlspecialchars($product['quantity'] > 0 ? '' : 'Out of Stock'); ?>
+                        </span>
+
+                        <?php if ($product['quantity'] > 0): ?>
+                            <form action="<?php echo URLROOT; ?>/cart/add/<?php echo $product['id']; ?>" method="POST" class="mt-2">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="btn btn-sm btn-primary">Add to Cart</button>
+                            </form>
+                        <?php endif; ?>
+                    </td>
+                <?php elseif(isLoggedIn() && isAdmin()): ?>
+                <td><?php echo htmlspecialchars($product['quantity'] ?? ''); ?></td>
                 <td>
                     <a href="<?php echo URLROOT; ?>/products/edit/<?php echo $product['id']; ?>" class="btn btn-sm btn-warning">Edit</a>
                     <form action="<?php echo URLROOT; ?>/products/delete/<?php echo $product['id']; ?>" method="POST" class="d-inline">

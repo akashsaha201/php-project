@@ -27,6 +27,14 @@
                 value="<?php echo htmlspecialchars($data['form']['price'] ?? ''); ?>">
             <span class="text-danger"><?php echo $data['errors']['price'] ?? ''; ?></span>
         </div>
+        
+        <!-- Quantity -->
+        <div class="mb-3">
+            <label class="form-label">Quantity</label>
+            <input type="text" name="quantity" class="form-control" 
+                value="<?php echo htmlspecialchars($data['form']['quantity'] ?? ''); ?>">
+            <span class="text-danger"><?php echo $data['errors']['quantity'] ?? ''; ?></span>
+        </div>
 
         <!-- Category -->
         <div class="mb-3">
