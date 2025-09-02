@@ -21,6 +21,7 @@ class Products extends Controller
     // Show all products
     public function index()
     {
+        if (!isLoggedIn()) redirect('users/login');
         $products = $this->productRepo->getAll();
         $data = ['products' => $products];
         $this->view('products/index', $data);
@@ -30,6 +31,7 @@ class Products extends Controller
     public function add()
     {
         if (!isLoggedIn()) redirect('users/login');
+        elseif(!isAdmin()) redirect('products');
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
@@ -83,9 +85,10 @@ class Products extends Controller
     }
 
     // Edit product
-    public function edit($id)
+    public function edit($id=null)
     {
-        if (!isLoggedIn()) redirect('users/login');
+         if (!isLoggedIn()) redirect('users/login');
+        elseif(!isAdmin()) redirect('products');
 
         $product = $this->productRepo->getById($id);
         if (!$product) die("Product not found");
@@ -149,9 +152,10 @@ class Products extends Controller
     }
 
     // Delete product
-    public function delete($id)
+    public function delete($id=null)
     {
-        if (!isLoggedIn()) redirect('users/login');
+         if (!isLoggedIn()) redirect('users/login');
+        elseif(!isAdmin()) redirect('products');
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->productRepo->delete($id);

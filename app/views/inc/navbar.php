@@ -18,9 +18,11 @@
                     <a class="nav-link" href="<?php echo URLROOT; ?>">Home</a>
                 </li>
                 <?php endif; ?>
+                <?php if(isLoggedIn()) : ?>
                 <li class="nav-item">
-                    <a class="nav-link" href="<?php echo URLROOT; ?>/products"><?php echo isLoggedIn() ? 'Product Management' : 'Products';?></a>
+                    <a class="nav-link" href="<?php echo URLROOT; ?>/products"><?php echo isAdmin() ? 'Product Management' : 'Products';?></a>
                 </li>
+                <?php endif; ?>
                 <li class="nav-item">
                     <a class="nav-link" href="<?php echo URLROOT; ?>/pages/about">About</a>
                 </li>

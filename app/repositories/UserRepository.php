@@ -9,11 +9,12 @@ class UserRepository {
     // Save new user
     public function save(User $user) {
         $this->db->query(
-            "INSERT INTO users (username, email, password) VALUES (:username, :email, :password)"
+            "INSERT INTO users (username, email, password, role) VALUES (:username, :email, :password, :role)"
         );
         $this->db->bind(':username', $user->getUsername());
         $this->db->bind(':email', $user->getEmail());
         $this->db->bind(':password', $user->getPassword());
+        $this->db->bind(':role', $user->getRole());
 
         return $this->db->execute();
     }
@@ -29,6 +30,7 @@ class UserRepository {
                 $row['username'],
                 $row['email'],
                 $row['password'],
+                $row['role'],
                 $row['id']
             );
         }
@@ -46,6 +48,7 @@ class UserRepository {
                 $row['username'],
                 $row['email'],
                 $row['password'],
+                $row['role'],
                 $row['id']
             );
         }

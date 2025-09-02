@@ -5,7 +5,7 @@
     <?php flash('update_success');?>
     <?php flash('delete_success');?>
     <h2 class="mb-4">Products</h2>
-    <?php if(isLoggedIn()): ?>
+    <?php if(isLoggedIn() && isAdmin()): ?>
     <a href="<?php echo URLROOT; ?>/products/add" class="btn btn-primary mb-3">Add Product</a>
     <?php endif; ?>
     <table class="table table-bordered table-striped">
@@ -18,7 +18,7 @@
             <th>Type</th>
             <th>Category</th>
             <th>Details</th>
-            <?php if(isLoggedIn()): ?>
+            <?php if(isLoggedIn() && isAdmin()): ?>
             <th>Actions</th>
             <?php endif; ?>
         </tr>
@@ -44,7 +44,7 @@
                         N/A
                     <?php endif; ?>
                 </td>
-                <?php if(isLoggedIn()): ?>
+                <?php if(isLoggedIn() && isAdmin()): ?>
                 <td>
                     <a href="<?php echo URLROOT; ?>/products/edit/<?php echo $product['id']; ?>" class="btn btn-sm btn-warning">Edit</a>
                     <form action="<?php echo URLROOT; ?>/products/delete/<?php echo $product['id']; ?>" method="POST" class="d-inline">

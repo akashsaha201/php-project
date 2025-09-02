@@ -81,12 +81,13 @@ class Users extends Controller
         $_SESSION['user_id'] = $user->getId();
         $_SESSION['username'] = $user->getUsername();
         $_SESSION['email'] = $user->getEmail();
+        $_SESSION['role'] = $user->getRole();
         redirect('products');
     }
 
     public function logout()
     {
-        unset($_SESSION['user_id'], $_SESSION['username'], $_SESSION['email']);
+        unset($_SESSION['user_id'], $_SESSION['username'], $_SESSION['email'], $_SESSION['role']);
         session_destroy();
         redirect('users/login');
     }
