@@ -38,7 +38,7 @@
 
         <h4>Total: <?php echo '$' . $data['total']; ?></h4>
         <a href="<?php echo URLROOT; ?>/cart/clear" class="btn btn-warning">Clear Cart</a>
-        <a href="<?php echo URLROOT; ?>/checkout" class="btn btn-success">Proceed to Checkout</a>
+        <a href="<?php echo URLROOT; ?>/orders/checkout" class="btn btn-success">Proceed to Checkout</a>
     <?php endif; ?>
 </div>
 

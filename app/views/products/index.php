@@ -38,10 +38,10 @@
                 <td><?php echo htmlspecialchars($product['category_name'] ?? ''); ?></td>
                 <td>
                     <?php if ($product['category_type'] === 'digital'): ?>
-                        <strong>File Size:</strong> <?php echo htmlspecialchars($product['file_size']); ?><br>
+                        <strong>File Size:</strong> <?php echo htmlspecialchars($product['file_size']) . ' MB'; ?><br>
                         <strong>Link:</strong> <a href="<?php echo htmlspecialchars($product['download_link']); ?>" target="_blank">Download</a>
                     <?php elseif ($product['category_type'] === 'physical'): ?>
-                        <strong>Weight:</strong> <?php echo htmlspecialchars($product['weight']); ?><br>
+                        <strong>Weight:</strong> <?php echo htmlspecialchars($product['weight']) . ' KG'; ?><br>
                         <strong>Shipping:</strong> $<?php echo number_format($product['shipping_cost'], 2); ?>
                     <?php else: ?>
                         N/A

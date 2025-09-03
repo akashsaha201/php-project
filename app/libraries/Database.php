@@ -71,5 +71,17 @@ class Database {
     return $this->conn->lastInsertId();
 }
 
+    public function beginTransaction() {
+        return $this->conn->beginTransaction();
+    }
+
+    public function commit() {
+        return $this->conn->commit();
+    }
+
+    public function rollBack() {
+        return $this->conn->rollBack();
+    }
+
 }
 ?>

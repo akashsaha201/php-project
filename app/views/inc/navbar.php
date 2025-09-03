@@ -31,6 +31,13 @@
                     </li>
                 <?php endif; ?>
 
+                <?php if(isLoggedIn() && !isAdmin()): ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php echo URLROOT; ?>/orders">My Orders</a>
+                    </li>
+                <?php endif; ?>
+
+
                 <li class="nav-item">
                     <a class="nav-link" href="<?php echo URLROOT; ?>/pages/about">About</a>
                 </li>
