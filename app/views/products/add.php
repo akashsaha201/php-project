@@ -76,7 +76,7 @@
         <div id="physicalFields" style="display: none;">
             <div class="mb-3">
                 <label class="form-label">Weight (kg)</label>
-                <input type="number" name="weight" class="form-control" value="<?php echo $data['form']['weight'] ?? ''; ?>">
+                <input type="number" step="0.01" name="weight" class="form-control" value="<?php echo $data['form']['weight'] ?? ''; ?>">
                 <span class="text-danger"><?php echo $data['errors']['weight'] ?? ''; ?></span>
             </div>
             <div class="mb-3">

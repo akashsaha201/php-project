@@ -13,31 +13,16 @@ class OrderRepository {
             $this->db->beginTransaction();
 
             // Insert order
-            $this->db->query("INSERT INTO orders (user_id, total_amount, status, created_at) 
-                              VALUES (:user_id, :total_amount, :status, NOW())");
-            $this->db->bind(':user_id', $order->getUserId());
-            $this->db->bind(':total_amount', $order->getTotalAmount());
-            $this->db->bind(':status', $order->getStatus() ?? 'pending');
-            $this->db->execute();
-
-            $orderId = $this->db->lastInsertId();
+            $orderId = $this->insertOrder($order);
             $order->setId($orderId);
 
-            // Insert items + update stock
+            // Insert order items + update stock
             foreach ($order->getItems() as $item) {
-                $this->db->query("INSERT INTO order_items (order_id, product_id, quantity, price) 
-                                  VALUES (:order_id, :product_id, :quantity, :price)");
-                $this->db->bind(':order_id', $orderId);
-                $this->db->bind(':product_id', $item->getProductId());
-                $this->db->bind(':quantity', $item->getQuantity());
-                $this->db->bind(':price', $item->getPrice());
-                $this->db->execute();
+                // Insert Order Item
+                $this->insertOrderItem($orderId, $item);
 
                 // Update stock
-                $this->db->query("UPDATE products SET quantity = quantity - :qty WHERE id = :id");
-                $this->db->bind(':qty', $item->getQuantity());
-                $this->db->bind(':id', $item->getProductId());
-                $this->db->execute();
+                $this->updateStock($item);
             }
 
             $this->db->commit();
@@ -47,6 +32,29 @@ class OrderRepository {
             throw $e;
         }
     }
+
+    public function createFailedOrder(Order $order) {
+        try {
+            $this->db->beginTransaction();
+
+            // Insert order
+            $orderId = $this->insertOrder($order);
+            $order->setId($orderId);
+
+            // Insert order items
+            foreach ($order->getItems() as $item) {
+                // Insert order item
+                $this->insertOrderItem($orderId, $item);
+            }
+
+            $this->db->commit();
+            return $orderId;
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
+    }
+
 
     // Get an order by ID (with items).
     public function getById($id) {
@@ -116,5 +124,32 @@ class OrderRepository {
         $item->setPrice($row['price']);
 
         return $item;
+    }
+
+    private function insertOrder(Order $order) {
+        $this->db->query("INSERT INTO orders (user_id, total_amount, status, created_at) 
+                        VALUES (:user_id, :total_amount, :status, NOW())");
+        $this->db->bind(':user_id', $order->getUserId());
+        $this->db->bind(':total_amount', $order->getTotalAmount());
+        $this->db->bind(':status', $order->getStatus());
+        $this->db->execute();
+        return $this->db->lastInsertId();
+    }
+
+    private function insertOrderItem($orderId, OrderItem $item) {
+        $this->db->query("INSERT INTO order_items (order_id, product_id, quantity, price) 
+                        VALUES (:order_id, :product_id, :quantity, :price)");
+        $this->db->bind(':order_id', $orderId);
+        $this->db->bind(':product_id', $item->getProductId());
+        $this->db->bind(':quantity', $item->getQuantity());
+        $this->db->bind(':price', $item->getPrice());
+        $this->db->execute();
+    }
+
+    private function updateStock(OrderItem $item) {
+        $this->db->query("UPDATE products SET quantity = quantity - :qty WHERE id = :id");
+        $this->db->bind(':qty', $item->getQuantity());
+        $this->db->bind(':id', $item->getProductId());
+        $this->db->execute();
     }
 }

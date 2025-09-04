@@ -11,6 +11,7 @@ class Users extends Controller
         $this->userRepository = new UserRepository(new Database);
     }
 
+    // Register user
     public function register()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -49,6 +50,7 @@ class Users extends Controller
         }
     }
 
+    // Login user
     public function login()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -76,6 +78,7 @@ class Users extends Controller
         }
     }
 
+    // Create user session
     private function createUserSession(User $user)
     {
         $_SESSION['user_id'] = $user->getId();
@@ -85,6 +88,7 @@ class Users extends Controller
         redirect('products');
     }
 
+    // Logout user
     public function logout()
     {
         unset($_SESSION['user_id'], $_SESSION['username'], $_SESSION['email'], $_SESSION['role']);

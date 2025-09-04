@@ -1,4 +1,6 @@
 <?php
+
+// validate base product inputs
 function validateProductCommon( $data) {
     $errors = [];
 
@@ -43,6 +45,7 @@ function validateProductCommon( $data) {
     return $errors;
 }
 
+// validate digital product inputs
 function validateDigitalProduct( $data)  {
     $errors = [];
 
@@ -63,6 +66,7 @@ function validateDigitalProduct( $data)  {
     return $errors;
 }
 
+// validate physical product inputs
 function validatePhysicalProduct( $data)  {
     $errors = [];
 
@@ -83,6 +87,7 @@ function validatePhysicalProduct( $data)  {
     return $errors;
 }
 
+// validate user registration inputs
 function validateUserRegistration( $data, UserRepository $userRepo)  {
     $errors = [];
 
@@ -111,6 +116,7 @@ function validateUserRegistration( $data, UserRepository $userRepo)  {
     return $errors;
 }
 
+// validate user login inputs
 function validateUserLogin( $data)  {
     $errors = [];
 

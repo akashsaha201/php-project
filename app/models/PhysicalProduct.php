@@ -9,6 +9,7 @@ class PhysicalProduct extends Product {
         $this->shipping_cost = $shipping_cost;
     }
 
+    // Getters
     public function getWeight() { return $this->weight; }
     public function getShippingCost() { return $this->shipping_cost; }
 }

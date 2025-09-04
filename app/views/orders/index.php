@@ -1,8 +1,6 @@
 <?php require APPROOT . '/views/inc/header.php'; ?>
 
 <div class="container mt-4">
-    <?php flash('order_success'); ?>
-    <?php flash('order_error'); ?>
     <h2><?php echo $data['title']; ?></h2>
 
     <?php if (empty($data['orders'])): ?>
@@ -23,7 +21,19 @@
                     <tr>
                         <td>#<?php echo $order->getId(); ?></td>
                         <td>$<?php echo number_format($order->getTotalAmount(), 2); ?></td>
-                        <td><?php echo htmlspecialchars($order->getStatus()); ?></td>
+                        <td>
+                            <?php 
+                            $status = ucfirst($order->getStatus()); 
+                            $color = match ($order->getStatus()) {
+                                'successful' => 'green',
+                                'failed'     => 'red',
+                                'pending'      => 'yellow'
+                            };
+                            ?>
+                            <span style="color: <?php echo $color; ?>;">
+                                <?php echo htmlspecialchars($status); ?>
+                            </span>
+                        </td>
                         <td><?php echo htmlspecialchars($order->getCreatedAt()); ?></td>
                         <td>
                             <a href="<?php echo URLROOT; ?>/orders/show/<?php echo $order->getId(); ?>" class="btn btn-sm btn-info">

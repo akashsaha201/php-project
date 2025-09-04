@@ -63,7 +63,7 @@
                 <?php elseif(isLoggedIn() && isAdmin()): ?>
                 <td><?php echo htmlspecialchars($product['quantity'] ?? ''); ?></td>
                 <td>
-                    <a href="<?php echo URLROOT; ?>/products/edit/<?php echo $product['id']; ?>" class="btn btn-sm btn-warning">Edit</a>
+                    <a href="<?php echo URLROOT; ?>/products/edit/<?php echo $product['id']; ?>" class="btn btn-sm btn-warning m-2">Edit</a>
                     <form action="<?php echo URLROOT; ?>/products/delete/<?php echo $product['id']; ?>" method="POST" class="d-inline">
                         <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this product?')">Delete</button>
                     </form>

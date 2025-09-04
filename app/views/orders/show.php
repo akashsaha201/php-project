@@ -1,9 +1,24 @@
 <?php require APPROOT . '/views/inc/header.php'; ?>
 
 <div class="container mt-4">
+    <?php flash('order_success'); ?>
+    <?php flash('order_error'); ?>
     <h2>Order #<?php echo $data['order']->getId(); ?></h2>
+    <p>
+        <strong>Status:</strong> 
+        <?php 
+            $status = ucfirst($data['order']->getStatus()); 
+            $color = match ($data['order']->getStatus()) {
+                'successful' => 'green',
+                'failed'     => 'red',
+                'pending'      => 'yellow'
+            };
+        ?>
+        <span style="color: <?php echo $color; ?>;">
+            <?php echo htmlspecialchars($status); ?>
+        </span>
+    </p>
 
-    <p><strong>Status:</strong> <?php echo htmlspecialchars($data['order']->getStatus()); ?></p>
     <p><strong>Total:</strong> $<?php echo number_format($data['order']->getTotalAmount(), 2); ?></p>
     <p><strong>Placed On:</strong> <?php echo htmlspecialchars($data['order']->getCreatedAt()); ?></p>
 

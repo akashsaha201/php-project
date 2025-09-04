@@ -1,6 +1,7 @@
 <?php 
     session_start();
 
+    //Flash message helper
     function flash($name = '', $message = '', $class = 'alert alert-success') {
         if(!empty($name)){
             if(!empty($message) && empty($_SESSION[$name])){
@@ -23,6 +24,7 @@
         }
     }
 
+    // Check if loggedIn
      function isLoggedIn() {
         if(isset($_SESSION['user_id'])) { 
             return true;
@@ -32,6 +34,7 @@
         }
     }
 
+    // Check if admin
     function isAdmin() {
         if(isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
             return true;

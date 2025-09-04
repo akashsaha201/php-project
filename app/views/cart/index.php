@@ -10,7 +10,7 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>Name</th>
+                    <th>Product Name</th>
                     <th>Price</th>
                     <th>Quantity</th>
                     <th>Subtotal</th>

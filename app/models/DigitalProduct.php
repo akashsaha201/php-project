@@ -9,6 +9,7 @@ class DigitalProduct extends Product {
         $this->download_link = $download_link;
     }
 
+    // Getters
     public function getFileSize() { return $this->file_size; }
     public function getDownloadLink() { return $this->download_link; }
 }

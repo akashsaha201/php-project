@@ -1,3 +1,15 @@
+<?php
+    $currentPage = '';
+    if (isset($_GET['url'])) {
+        $currentPage = explode('/', rtrim($_GET['url'], '/'))[0];
+    }
+    // Default to "home" if no URL given
+    if ($currentPage === '') {
+        $currentPage = 'home';
+    }
+?>
+
+
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
     <div class="container">
         <!-- Brand / Title -->
@@ -15,17 +27,17 @@
             <ul class="navbar-nav me-auto">
                 <?php if(!isLoggedIn()) : ?>
                 <li class="nav-item">
-                    <a class="nav-link" href="<?php echo URLROOT; ?>">Home</a>
+                    <a class="nav-link <?php echo ($currentPage == 'home') ? 'active' : ''; ?>" href="<?php echo URLROOT; ?>">Home</a>
                 </li>
                 <?php endif; ?>
                 <?php if(isLoggedIn()) : ?>
                 <li class="nav-item">
-                    <a class="nav-link" href="<?php echo URLROOT; ?>/products"><?php echo isAdmin() ? 'Product Management' : 'Products';?></a>
+                    <a class="nav-link <?php echo ($currentPage == 'products') ? 'active' : ''; ?>" href="<?php echo URLROOT; ?>/products"><?php echo isAdmin() ? 'Product Management' : 'Products';?></a>
                 </li>
                 <?php endif; ?>
                 <?php if(isLoggedIn() && !isAdmin()): ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?php echo URLROOT; ?>/cart">
+                        <a class="nav-link <?php echo ($currentPage == 'cart') ? 'active' : ''; ?>" href="<?php echo URLROOT; ?>/cart">
                             🛒 Cart (<?php echo isset($_SESSION['cart']) ? array_sum(array_column($_SESSION['cart'], 'quantity')) : 0; ?>)
                         </a>
                     </li>
@@ -33,13 +45,13 @@
 
                 <?php if(isLoggedIn() && !isAdmin()): ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?php echo URLROOT; ?>/orders">My Orders</a>
+                        <a class="nav-link <?php echo ($currentPage == 'orders') ? 'active' : ''; ?>" href="<?php echo URLROOT; ?>/orders">My Orders</a>
                     </li>
                 <?php endif; ?>
 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="<?php echo URLROOT; ?>/pages/about">About</a>
+                    <a class="nav-link <?php echo ($currentPage == 'pages' && isset($_GET['url']) && strpos($_GET['url'], 'about') !== false) ? 'active' : ''; ?>" href="<?php echo URLROOT; ?>/pages/about">About</a>
                 </li>
             </ul>
 
@@ -56,10 +68,10 @@
                     </li>
                 <?php else: ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?php echo URLROOT; ?>/users/login">Login</a>
+                        <a class="nav-link <?php echo ($currentPage == 'users' && strpos($_GET['url'] ?? '', 'login') !== false) ? 'active' : ''; ?>" href="<?php echo URLROOT; ?>/users/login">Login</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?php echo URLROOT; ?>/users/register">Register</a>
+                        <a class="nav-link <?php echo ($currentPage == 'users' && strpos($_GET['url'] ?? '', 'register') !== false) ? 'active' : ''; ?>" href="<?php echo URLROOT; ?>/users/register">Register</a>
                     </li>
                 <?php endif; ?>
             </ul>
