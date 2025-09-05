@@ -3,82 +3,8 @@
 class OrderRepository {
     private $db;
 
-    public function __construct(Database $db) {
-        $this->db = $db;
-    }
-
-    // Create a new order with its items (transaction-safe).
-    public function createOrder(Order $order) {
-        try {
-            $this->db->beginTransaction();
-
-            // Insert order
-            $orderId = $this->insertOrder($order);
-            $order->setId($orderId);
-
-            // Insert order items + update stock
-            foreach ($order->getItems() as $item) {
-                // Insert Order Item
-                $this->insertOrderItem($orderId, $item);
-
-                // Update stock
-                $this->updateStock($item);
-            }
-
-            $this->db->commit();
-            return $orderId;
-        } catch (Exception $e) {
-            $this->db->rollBack();
-            throw $e;
-        }
-    }
-
-    public function createFailedOrder(Order $order) {
-        try {
-            $this->db->beginTransaction();
-
-            // Insert order
-            $orderId = $this->insertOrder($order);
-            $order->setId($orderId);
-
-            // Insert order items
-            foreach ($order->getItems() as $item) {
-                // Insert order item
-                $this->insertOrderItem($orderId, $item);
-            }
-
-            $this->db->commit();
-            return $orderId;
-        } catch (Exception $e) {
-            $this->db->rollBack();
-            throw $e;
-        }
-    }
-
-
-    // Get an order by ID (with items).
-    public function getById($id) {
-        $this->db->query("SELECT * FROM orders WHERE id = :id");
-        $this->db->bind(':id', $id);
-        $orderRow = $this->db->single();
-
-        if (!$orderRow) return null;
-
-        $order = $this->mapOrder($orderRow);
-
-        // Fetch items
-        $this->db->query("SELECT oi.*, p.name as product_name 
-                        FROM order_items oi 
-                        JOIN products p ON oi.product_id = p.id 
-                        WHERE oi.order_id = :id");
-        $this->db->bind(':id', $id);
-        $items = $this->db->resultSet();
-
-        foreach ($items as $row) {
-            $order->addItem($this->mapOrderItem($row));
-        }
-
-        return $order;
+    public function __construct() {
+        $this->db = new Database();
     }
 
     // Get all orders for a specific user
@@ -93,6 +19,79 @@ class OrderRepository {
         }
         return $orders;
     }
+
+    public function createOrder(Order $order) {
+        try {
+            $this->db->beginTransaction();
+
+            $orderId = $this->insertOrder($order);
+            $order->setId($orderId);
+
+            foreach ($order->getItems() as $item) {
+                $this->insertOrderItem($orderId, $item);
+            }
+
+            $this->db->commit();
+            return $orderId;
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
+    }
+
+    public function markOrderSuccessful($orderId) {
+        $this->db->beginTransaction();
+        try {
+            // update status
+            $this->updateStatus($orderId, 'successful');
+
+            // get items & update stock
+            $this->db->query("SELECT * FROM order_items WHERE order_id = :id");
+            $this->db->bind(':id', $orderId);
+            $items = $this->db->resultSet();
+
+            foreach ($items as $row) {
+                $this->db->query("UPDATE products SET quantity = quantity - :qty WHERE id = :pid");
+                $this->db->bind(':qty', $row['quantity']);
+                $this->db->bind(':pid', $row['product_id']);
+                $this->db->execute();
+            }
+
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
+    }
+
+    public function markOrderFailed($orderId) {
+        return $this->updateStatus($orderId, 'failed');
+    }
+
+    // Fetch order only if belongs to user
+    public function getByIdForUser($id, $userId) {
+        $this->db->query("SELECT * FROM orders WHERE id = :id AND user_id = :user_id");
+        $this->db->bind(':id', $id);
+        $this->db->bind(':user_id', $userId);
+        $row = $this->db->single();
+        if (!$row) return null;
+
+        $order = $this->mapOrder($row);
+
+        $this->db->query("SELECT oi.*, p.name as product_name 
+                        FROM order_items oi 
+                        JOIN products p ON oi.product_id = p.id 
+                        WHERE oi.order_id = :id");
+        $this->db->bind(':id', $id);
+        $items = $this->db->resultSet();
+
+        foreach ($items as $row) {
+            $order->addItem($this->mapOrderItem($row));
+        }
+
+        return $order;
+    }
+
 
     // Update order status.
     public function updateStatus($id, $status) {
@@ -143,13 +142,6 @@ class OrderRepository {
         $this->db->bind(':product_id', $item->getProductId());
         $this->db->bind(':quantity', $item->getQuantity());
         $this->db->bind(':price', $item->getPrice());
-        $this->db->execute();
-    }
-
-    private function updateStock(OrderItem $item) {
-        $this->db->query("UPDATE products SET quantity = quantity - :qty WHERE id = :id");
-        $this->db->bind(':qty', $item->getQuantity());
-        $this->db->bind(':id', $item->getProductId());
         $this->db->execute();
     }
 }

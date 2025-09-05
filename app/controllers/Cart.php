@@ -13,9 +13,6 @@ class Cart extends Controller {
         if (!isset($_SESSION['cart'])) {
             $_SESSION['cart'] = [];
         }
-
-        $db = new Database;
-        $this->productRepo = new ProductRepository($db);
     }
 
     // Show cart
@@ -31,6 +28,7 @@ class Cart extends Controller {
 
     // Add product
     public function add($productId) {
+        $this->productRepo = new ProductRepository();
         $quantity = isset($_POST['quantity']) ? (int)$_POST['quantity'] : 1;
         if ($quantity < 1) $quantity = 1;
 
@@ -62,6 +60,7 @@ class Cart extends Controller {
 
     // Update quantity
     public function update($productId, $action) {
+        $this->productRepo = new ProductRepository();
         if (isset($_SESSION['cart'][$productId])) {
             $product = $this->productRepo->getById($productId);
             if ($product) {

@@ -2,8 +2,8 @@
 class UserRepository {
     private $db;
 
-    public function __construct(Database $db) {
-        $this->db = $db;
+    public function __construct() {
+        $this->db = new Database();
     }
 
     // Save new user

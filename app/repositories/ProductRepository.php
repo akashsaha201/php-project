@@ -3,9 +3,9 @@ class ProductRepository
 {
     private $db;
 
-    public function __construct($db)
+    public function __construct()
     {
-        $this->db = $db;
+        $this->db = new Database();
     }
 
     public function insert(Product $product): int

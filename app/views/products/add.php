@@ -2,7 +2,7 @@
 
 <div class="container mt-4">
     <h2>Add Product</h2>
-    <form action="<?php echo URLROOT; ?>/products/add" method="POST">
+    <form action="<?php echo URLROOT; ?>/products/submitAdd" method="POST">
 
         <!-- Type -->
         <div class="mb-3">

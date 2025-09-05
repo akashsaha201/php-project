@@ -1,6 +1,7 @@
 <?php require APPROOT . '/views/inc/header.php'; ?>
 
 <div class="container mt-4">
+    <?php flash('order_invalid'); ?>
     <h2><?php echo $data['title']; ?></h2>
 
     <?php if (empty($data['orders'])): ?>
@@ -27,7 +28,7 @@
                             $color = match ($order->getStatus()) {
                                 'successful' => 'green',
                                 'failed'     => 'red',
-                                'pending'      => 'yellow'
+                                'pending'      => 'orange'
                             };
                             ?>
                             <span style="color: <?php echo $color; ?>;">

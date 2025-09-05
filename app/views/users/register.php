@@ -4,7 +4,7 @@
         <div class="col-md-6">
             <div class="card shadow-sm p-4">
                 <h2 class="text-center mb-4">Register</h2>
-                <form action="<?php echo URLROOT; ?>/users/register" method="POST">
+                <form action="<?php echo URLROOT; ?>/users/submitRegister" method="POST">
                     
                     <!-- Username -->
                     <div class="mb-3">

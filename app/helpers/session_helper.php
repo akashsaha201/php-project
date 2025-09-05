@@ -36,7 +36,7 @@
 
     // Check if admin
     function isAdmin() {
-        if(isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
+        if(isLoggedIn() && isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
             return true;
         }
         else {

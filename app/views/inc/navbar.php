@@ -68,10 +68,10 @@
                     </li>
                 <?php else: ?>
                     <li class="nav-item">
-                        <a class="nav-link <?php echo ($currentPage == 'users' && strpos($_GET['url'] ?? '', 'login') !== false) ? 'active' : ''; ?>" href="<?php echo URLROOT; ?>/users/login">Login</a>
+                        <a class="nav-link <?php echo ($currentPage == 'users' && (strpos($_GET['url'] ?? '', 'login') || strpos($_GET['url'] ?? '', 'submitLogin'))) ? 'active' : ''; ?>" href="<?php echo URLROOT; ?>/users/login">Login</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <?php echo ($currentPage == 'users' && strpos($_GET['url'] ?? '', 'register') !== false) ? 'active' : ''; ?>" href="<?php echo URLROOT; ?>/users/register">Register</a>
+                        <a class="nav-link <?php echo ($currentPage == 'users' && (strpos($_GET['url'] ?? '', 'register') || strpos($_GET['url'] ?? '', 'submitRegister'))) ? 'active' : ''; ?>" href="<?php echo URLROOT; ?>/users/register">Register</a>
                     </li>
                 <?php endif; ?>
             </ul>

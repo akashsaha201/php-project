@@ -1,7 +1,5 @@
 <?php
 
-require_once APPROOT . '/helpers/validation_helper.php';
-
 class Products extends Controller
 {
     private $productRepo;
@@ -11,151 +9,174 @@ class Products extends Controller
 
     public function __construct()
     {
-        $db = new Database;
-        $this->productRepo = new ProductRepository($db);
-        $this->digitalRepo = new DigitalProductRepository($db);
-        $this->physicalRepo = new PhysicalProductRepository($db);
-        $this->categoryRepo = new CategoryRepository($db);
+        if (!isLoggedIn()) redirect('users/login');
+
+        $currentMethod = end(explode('/',$_REQUEST['url']));
+        $adminMethods = ['add', 'submitAdd', 'edit', 'submitEdit', 'delete'];
+
+        if (!isAdmin() && in_array($currentMethod, $adminMethods)) {
+            redirect('products');
+        }
     }
 
     // Show all products
     public function index()
     {
-        if (!isLoggedIn()) redirect('users/login');
+        $this->productRepo = new ProductRepository();
+
         $products = $this->productRepo->getAll();
         $data = ['products' => $products];
         $this->view('products/index', $data);
     }
 
-    // Add product
-    public function add()
-    {
-        if (!isLoggedIn()) redirect('users/login');
-        elseif(!isAdmin()) redirect('products');
+    //  Add product page
+    public function add() {
+        if(!isAdmin()) redirect('products');
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
-            $type = $_POST['type'] ?? '';
+        $this->categoryRepo = new CategoryRepository();
 
-            // Validate common fields
-            $errors = validateProductCommon($_POST);
-
-            // Type-specific validations
-            if ($type === 'digital') {
-                $errors = array_merge($errors, validateDigitalProduct($_POST));
-            } elseif ($type === 'physical') {
-                $errors = array_merge($errors, validatePhysicalProduct($_POST));
-            } else {
-                $errors['type'] = "Invalid product type.";
-            }
-
-            if (!empty($errors)) {
-                $data = [
-                    'errors' => $errors,
-                    'form' => $_POST,
-                    'categories' => !empty($type) ? $this->categoryRepo->getByType($type) : []
-                ];
-                $this->view('products/add', $data);
-                return;
-            }
-
-            // Save product (common part)
-            $product = new Product($_POST['name'], $_POST['email'], $_POST['price'], $_POST['quantity'], $_POST['category_id']);
-            $productId = $this->productRepo->insert($product);
-
-            if ($type === 'digital') {
-                $digital = new DigitalProduct($productId, $_POST['name'], $_POST['email'], $_POST['price'], $_POST['quantity'], $_POST['category_id'], $_POST['file_size'], $_POST['download_link']);
-                $this->digitalRepo->insert($digital);
-            } elseif ($type === 'physical') {
-                $physical = new PhysicalProduct($productId, $_POST['name'], $_POST['email'], $_POST['price'], $_POST['quantity'], $_POST['category_id'], $_POST['weight'], $_POST['shipping_cost']);
-                $this->physicalRepo->insert($physical);
-            }
-
-            flash('add_success', 'Product added successfully');
-            redirect('products');
-
-        } else {
-            $data = [
-                'categories' => $this->categoryRepo->getAll(),
-                'errors' => [],
-                'form' => []
-            ];
-            $this->view('products/add', $data);
-        }
+        $data = [
+            'categories' => $this->categoryRepo->getAll(),
+            'errors' => [],
+            'form' => []
+        ];
+        $this->view('products/add', $data);
     }
 
-    // Edit product
-    public function edit($id=null)
+
+    // Handle Add product submission
+    public function submitAdd()
     {
-         if (!isLoggedIn()) redirect('users/login');
-        elseif(!isAdmin()) redirect('products');
+        if(!isAdmin()) redirect('products');
+        
+        $this->setupRepositories();
+
+
+        $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+        $type = $_POST['type'] ?? '';
+
+        // Validate common fields
+        $errors = $this->validateProduct($_POST);
+
+        // Type-specific validations
+        if ($type === 'digital') {
+            $errors = array_merge($errors, $this->validateDigitalProduct($_POST));
+        } elseif ($type === 'physical') {
+            $errors = array_merge($errors, $this->validatePhysicalProduct($_POST));
+        } else {
+            $errors['type'] = "Invalid product type.";
+        }
+
+        if (!empty($errors)) {
+            $data = [
+                'errors' => $errors,
+                'form' => $_POST,
+                'categories' => !empty($type) ? $this->categoryRepo->getByType($type) : []
+            ];
+            $this->view('products/add', $data);
+            return;
+        }
+
+        // Save product (common part)
+        $product = new Product($_POST['name'], $_POST['email'], $_POST['price'], $_POST['quantity'], $_POST['category_id']);
+        $productId = $this->productRepo->insert($product);
+
+        if ($type === 'digital') {
+            $digital = new DigitalProduct($productId, $_POST['name'], $_POST['email'], $_POST['price'], $_POST['quantity'], $_POST['category_id'], $_POST['file_size'], $_POST['download_link']);
+            $this->digitalRepo->insert($digital);
+        } elseif ($type === 'physical') {
+            $physical = new PhysicalProduct($productId, $_POST['name'], $_POST['email'], $_POST['price'], $_POST['quantity'], $_POST['category_id'], $_POST['weight'], $_POST['shipping_cost']);
+            $this->physicalRepo->insert($physical);
+        }
+
+        flash('add_success', 'Product added successfully');
+        redirect('products');
+    }
+
+    // Edit product page
+    public function edit($id = null) {
+        if(!isAdmin()) redirect('products');
+
+        $this->setupRepositories();
 
         $product = $this->productRepo->getById($id);
         if (!$product) die("Product not found");
 
         $type = $this->productRepo->getProductType($id);
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+        $extra = ($type === 'digital') ? $this->digitalRepo->getById($id) : $this->physicalRepo->getById($id);
 
-            $errors = validateProductCommon($_POST);
+        $data = [
+            'form' => array_merge((array)$product, (array)$extra),
+            'errors' => [],
+            'categories' => $this->categoryRepo->getByType($type),
+            'id' => $id,
+            'type' => $type
+        ];
+        $this->view('products/edit', $data);
 
-            if ($type === 'digital') {
-                $errors = array_merge($errors, validateDigitalProduct($_POST));
-            } elseif ($type === 'physical') {
-                $errors = array_merge($errors, validatePhysicalProduct($_POST));
-            }
+    }
 
-            if (!empty($errors)) {
-                $data = [
-                    'errors' => $errors,
-                    'form' => $_POST,
-                    'categories' => $this->categoryRepo->getByType($type),
-                    'id' => $id,
-                    'type' => $type
-                ];
-                $this->view('products/edit', $data);
-                return;
-            }
+    // Handle edit product
+    public function submitEdit($id = null)
+    {
+        if(!isAdmin()) redirect('products');
+        
+        $this->setupRepositories();
 
-            // Update product table
-            $product->setName($_POST['name']);
-            $product->setEmail($_POST['email']);
-            $product->setPrice($_POST['price']);
-            $product->setQuantity($_POST['quantity']);
-            $product->setCategoryId($_POST['category_id']);
+        $product = $this->productRepo->getById($id);
+        if (!$product) die("Product not found");
 
-            // Update child table
-            if ($type === 'digital') {
-                $digital = new DigitalProduct($id, $_POST['name'], $_POST['email'], $_POST['price'], $_POST['quantity'], $_POST['category_id'], $_POST['file_size'], $_POST['download_link']);
-                $this->digitalRepo->update($digital);
-            } elseif ($type === 'physical') {
-                $physical = new PhysicalProduct($id, $_POST['name'], $_POST['email'], $_POST['price'], $_POST['quantity'], $_POST['category_id'], $_POST['weight'], $_POST['shipping_cost']);
-                $this->physicalRepo->update($physical);
-            }
+        $type = $this->productRepo->getProductType($id);
 
-            flash('update_success', 'Product updated successfully');
-            redirect('products');
+        $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
 
-        } else {
-            $extra = ($type === 'digital') ? $this->digitalRepo->getById($id) : $this->physicalRepo->getById($id);
+        $errors = $this->validateProduct($_POST);
 
+        if ($type === 'digital') {
+            $errors = array_merge($errors, $this->validateDigitalProduct($_POST));
+        } elseif ($type === 'physical') {
+            $errors = array_merge($errors, $this->validatePhysicalProduct($_POST));
+        }
+
+        if (!empty($errors)) {
             $data = [
-                'form' => array_merge((array)$product, (array)$extra),
-                'errors' => [],
+                'errors' => $errors,
+                'form' => $_POST,
                 'categories' => $this->categoryRepo->getByType($type),
                 'id' => $id,
                 'type' => $type
             ];
             $this->view('products/edit', $data);
+            return;
         }
+
+        // Update product table
+        $product->setName($_POST['name']);
+        $product->setEmail($_POST['email']);
+        $product->setPrice($_POST['price']);
+        $product->setQuantity($_POST['quantity']);
+        $product->setCategoryId($_POST['category_id']);
+
+        // Update child table
+        if ($type === 'digital') {
+            $digital = new DigitalProduct($id, $_POST['name'], $_POST['email'], $_POST['price'], $_POST['quantity'], $_POST['category_id'], $_POST['file_size'], $_POST['download_link']);
+            $this->digitalRepo->update($digital);
+        } elseif ($type === 'physical') {
+            $physical = new PhysicalProduct($id, $_POST['name'], $_POST['email'], $_POST['price'], $_POST['quantity'], $_POST['category_id'], $_POST['weight'], $_POST['shipping_cost']);
+            $this->physicalRepo->update($physical);
+        }
+
+        flash('update_success', 'Product updated successfully');
+        redirect('products');
     }
 
     // Delete product
     public function delete($id=null)
     {
-         if (!isLoggedIn()) redirect('users/login');
-        elseif(!isAdmin()) redirect('products');
+        if(!isAdmin()) redirect('products');
+
+        $this->productRepo = new ProductRepository();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->productRepo->delete($id);
@@ -164,5 +185,99 @@ class Products extends Controller
         } else {
             die("Invalid request");
         }
+    }
+
+    private function setupRepositories() {
+        $this->productRepo = new ProductRepository();
+        $this->digitalRepo = new DigitalProductRepository();
+        $this->physicalRepo = new PhysicalProductRepository();
+        $this->categoryRepo = new CategoryRepository();
+    }
+
+    // validate base product inputs
+    private function validateProduct( $data) {
+        $errors = [];
+
+        // Name
+        $name = trim($data['name'] ?? '');
+        if (empty($name)) {
+            $errors['name'] = 'Please enter name';
+        } elseif (strlen($name) < 3) {
+            $errors['name'] = "Product name must be at least 3 characters.";
+        }
+
+        // Email
+        $email = trim($data['email'] ?? '');
+        if (empty($email)) {
+            $errors['email'] = 'Please enter email';
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors['email'] = "Invalid email format.";
+        }
+
+        // Price
+        $price = $data['price'] ?? '';
+        if ($price === '') {
+            $errors['price'] = 'Please enter price';
+        }elseif (!is_numeric($price) || $price <= 0) {
+            $errors['price'] = "Price must be a positive number.";
+        }
+        
+        // Quantity
+        $quantity = $data['quantity'] ?? '';
+        if ($quantity === '') {
+            $errors['quantity'] = 'Please enter quantity';
+        } elseif (!is_numeric($quantity) || $quantity < 0) {
+            $errors['quantity'] = "Quantity cannot be negative.";
+        }
+
+        // Category
+        $category_id = $data['category_id'] ?? '';
+        if (empty($category_id)) {
+            $errors['category_id'] = "Please select a category.";
+        }
+
+        return $errors;
+    }
+
+    // validate digital product inputs
+    private function validateDigitalProduct( $data)  {
+        $errors = [];
+
+        $fileSize = $data['file_size'] ?? '';
+        $downloadLink = trim($data['download_link'] ?? '');
+        if (empty($fileSize)) {
+            $errors['file_size'] = 'Please enter file size';
+        }elseif (!is_numeric($fileSize) || $fileSize <= 0) {
+            $errors['file_size'] = "File size must be a positive number.";
+        }
+
+        if (empty($downloadLink)) {
+            $errors['download_link'] = 'Please enter download link';
+        }elseif (!filter_var($downloadLink, FILTER_VALIDATE_URL)) {
+            $errors['download_link'] = "Download link must be a valid URL.";
+        }
+
+        return $errors;
+    }
+
+    // validate physical product inputs
+    private function validatePhysicalProduct( $data)  {
+        $errors = [];
+
+        $weight = $data['weight'] ?? '';
+        $shippingCost = $data['shipping_cost'] ?? '';
+
+        if (empty($weight)) {
+            $errors['weight'] = 'Please enter weight';
+        }elseif (!is_numeric($weight) || $weight <= 0) {
+            $errors['weight'] = "Weight must be a positive number.";
+        }
+        if (empty($shippingCost)) {
+            $errors['shipping_cost'] = 'Please enter shipping cost';
+        }elseif (!is_numeric($shippingCost) || $shippingCost < 0) {
+            $errors['shipping_cost'] = "Shipping cost must be 0 or greater.";
+        }
+
+        return $errors;
     }
 }

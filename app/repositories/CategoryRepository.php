@@ -3,8 +3,8 @@
 class CategoryRepository {
     private $db;
 
-    public function __construct(Database $db) {
-        $this->db = $db;
+    public function __construct() {
+        $this->db = new Database();
     }
 
     // Get all categories

@@ -2,7 +2,7 @@
 
 <div class="container mt-4">
     <h2>Edit <?php echo ucfirst($data['type']); ?> Product</h2>
-    <form action="<?php echo URLROOT; ?>/products/edit/<?php echo $data['id']; ?>" method="post">
+    <form action="<?php echo URLROOT; ?>/products/submitEdit/<?php echo $data['id']; ?>" method="post">
         
         <!-- Name -->
         <div class="mb-3">

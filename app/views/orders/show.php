@@ -11,7 +11,7 @@
             $color = match ($data['order']->getStatus()) {
                 'successful' => 'green',
                 'failed'     => 'red',
-                'pending'      => 'yellow'
+                'pending'      => 'orange'
             };
         ?>
         <span style="color: <?php echo $color; ?>;">

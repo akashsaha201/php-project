@@ -4,10 +4,9 @@ class PhysicalProductRepository
     private $db;
     private $productRepo;
 
-    public function __construct(Database $db)
+    public function __construct()
     {
-        $this->db = $db;
-        $this->productRepo = new ProductRepository($db);
+        $this->db = new Database();
     }
 
     public function insert(PhysicalProduct $physical)
@@ -22,6 +21,7 @@ class PhysicalProductRepository
 
     public function update(PhysicalProduct $product): bool
     {
+        $this->productRepo = new ProductRepository();
         // Update products first
         $this->productRepo->update($product);
 
