@@ -114,6 +114,15 @@ class Orders extends Controller {
         if ($session->payment_status === 'paid') {
             try {
                 $this->orderRepo->markOrderSuccessful($orderId);
+                
+                // Get order & user
+                $order = $this->orderRepo->getByIdForUser($orderId, $_SESSION['user_id']);
+                $userRepo = new UserRepository();
+                $user = $userRepo->findById($_SESSION['user_id']);
+
+                // Send email
+                Mailer::sendOrderConfirmation($user->getEmail(), $user->getUsername(), $order);
+
                 unset($_SESSION['cart']);
                 flash('order_success', 'Payment successful! Your order has been placed.', 'alert alert-success');
                 redirect("orders/show/" . $orderId);

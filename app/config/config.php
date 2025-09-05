@@ -14,5 +14,11 @@ define('STRIPE_SECRET_KEY', $_ENV['STRIPE_SECRET_KEY']);
 define('STRIPE_PUBLISHABLE_KEY', $_ENV['STRIPE_PUBLISHABLE_KEY']);
 
 
+define('MAIL_FROM_NAME', $_ENV['MAIL_FROM_NAME']);
+define('MAIL_FROM', $_ENV['MAIL_FROM']);
+define('MAIL_USERNAME', $_ENV['MAIL_USERNAME']);
+define('MAIL_PASSWORD', $_ENV['MAIL_PASSWORD']);
+
+
 define('APPROOT', dirname(dirname(__FILE__)));
 define('URLROOT', 'http://localhost/php-project');
