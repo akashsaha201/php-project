@@ -12,7 +12,7 @@ class Products extends Controller
         if (!isLoggedIn()) redirect('users/login');
 
         $currentMethod = end(explode('/',$_REQUEST['url']));
-        $adminMethods = ['add', 'submitAdd', 'edit', 'submitEdit', 'delete'];
+        $adminMethods = ['create', 'store', 'edit', 'update', 'destroy'];
 
         if (!isAdmin() && in_array($currentMethod, $adminMethods)) {
             redirect('products');
@@ -30,8 +30,7 @@ class Products extends Controller
     }
 
     //  Add product page
-    public function add() {
-        if(!isAdmin()) redirect('products');
+    public function create() {
 
         $this->categoryRepo = new CategoryRepository();
 
@@ -45,9 +44,8 @@ class Products extends Controller
 
 
     // Handle Add product submission
-    public function submitAdd()
+    public function store()
     {
-        if(!isAdmin()) redirect('products');
         
         $this->setupRepositories();
 
@@ -95,7 +93,6 @@ class Products extends Controller
 
     // Edit product page
     public function edit($id = null) {
-        if(!isAdmin()) redirect('products');
 
         $this->setupRepositories();
 
@@ -118,9 +115,8 @@ class Products extends Controller
     }
 
     // Handle edit product
-    public function submitEdit($id = null)
+    public function update($id = null)
     {
-        if(!isAdmin()) redirect('products');
         
         $this->setupRepositories();
 
@@ -172,9 +168,8 @@ class Products extends Controller
     }
 
     // Delete product
-    public function delete($id=null)
+    public function destroy($id=null)
     {
-        if(!isAdmin()) redirect('products');
 
         $this->productRepo = new ProductRepository();
 

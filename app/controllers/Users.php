@@ -7,7 +7,7 @@ class Users extends Controller
     public function __construct()
     {
         $currentMethod = end(explode('/',$_REQUEST['url']));
-        $publicMethods = ['login', 'submitLogin', 'register', 'submitRegister'];
+        $publicMethods = ['create', 'store', 'showLoginForm', 'authenticate'];
 
         if (isLoggedIn() && in_array($currentMethod, $publicMethods)) {
             redirect('products');
@@ -15,7 +15,7 @@ class Users extends Controller
     }
     
     // Show registration page
-    public function register() {
+    public function create() {
         $data = [
             'username' => '',
             'email' => '',
@@ -30,7 +30,7 @@ class Users extends Controller
     }
 
     // Handle register submission
-    public function submitRegister()
+    public function store()
     {
         $this->userRepository = new UserRepository();
         $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
@@ -55,13 +55,13 @@ class Users extends Controller
     }
     
     // Show login page
-    public function login() {
+    public function showLoginForm() {
         $data = ['email' => '', 'password' => '', 'email_err' => '', 'password_err' => ''];
         $this->view('users/login', $data);
     }
 
     // Handle login submission
-    public function submitLogin()
+    public function authenticate()
     {
         $this->userRepository = new UserRepository();
         $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
@@ -76,7 +76,7 @@ class Users extends Controller
 
         $user = $this->userRepository->findByEmail($_POST['email']);
         if ($user && password_verify($_POST['password'], $user->getPassword())) {
-            $this->createUserSession($user);
+            $this->createSession($user);
         } else {
             $data = array_merge($_POST, ['password_err' => 'Invalid credentials']);
             $this->view('users/login', $data);
@@ -84,15 +84,15 @@ class Users extends Controller
     }
 
     // Logout user
-    public function logout()
+    public function destroySession()
     {
         unset($_SESSION['user_id'], $_SESSION['username'], $_SESSION['email'], $_SESSION['role']);
         session_destroy();
-        redirect('users/login');
+        redirect('users/showLoginForm');
     }
     
     // Create user session
-    private function createUserSession(User $user)
+    private function createSession(User $user)
     {
         $_SESSION['user_id'] = $user->getId();
         $_SESSION['username'] = $user->getUsername();

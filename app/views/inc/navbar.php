@@ -35,6 +35,11 @@
                     <a class="nav-link <?php echo ($currentPage == 'products') ? 'active' : ''; ?>" href="<?php echo URLROOT; ?>/products"><?php echo isAdmin() ? 'Product Management' : 'Products';?></a>
                 </li>
                 <?php endif; ?>
+                <?php if(isAdmin()) : ?>
+                <li class="nav-item">
+                    <a class="nav-link <?php echo ($currentPage == 'reports') ? 'active' : ''; ?>" href="<?php echo URLROOT; ?>/reports">Report</a>
+                </li>
+                <?php endif; ?>
                 <?php if(isLoggedIn() && !isAdmin()): ?>
                     <li class="nav-item">
                         <a class="nav-link <?php echo ($currentPage == 'cart') ? 'active' : ''; ?>" href="<?php echo URLROOT; ?>/cart">
@@ -64,14 +69,14 @@
                         </span>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?php echo URLROOT; ?>/users/logout">Logout</a>
+                        <a class="nav-link" href="<?php echo URLROOT; ?>/users/destroySession">Logout</a>
                     </li>
                 <?php else: ?>
                     <li class="nav-item">
-                        <a class="nav-link <?php echo ($currentPage == 'users' && (strpos($_GET['url'] ?? '', 'login') || strpos($_GET['url'] ?? '', 'submitLogin'))) ? 'active' : ''; ?>" href="<?php echo URLROOT; ?>/users/login">Login</a>
+                        <a class="nav-link <?php echo ($currentPage == 'users' && (strpos($_GET['url'] ?? '', 'authenticate') || strpos($_GET['url'] ?? '', 'showLoginForm'))) ? 'active' : ''; ?>" href="<?php echo URLROOT; ?>/users/showLoginForm">Login</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <?php echo ($currentPage == 'users' && (strpos($_GET['url'] ?? '', 'register') || strpos($_GET['url'] ?? '', 'submitRegister'))) ? 'active' : ''; ?>" href="<?php echo URLROOT; ?>/users/register">Register</a>
+                        <a class="nav-link <?php echo ($currentPage == 'users' && (strpos($_GET['url'] ?? '', 'create') || strpos($_GET['url'] ?? '', 'store'))) ? 'active' : ''; ?>" href="<?php echo URLROOT; ?>/users/create">Register</a>
                     </li>
                 <?php endif; ?>
             </ul>

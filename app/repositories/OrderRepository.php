@@ -101,6 +101,35 @@ class OrderRepository {
         return $this->db->execute();
     }
 
+    // Get total number of orders
+    public function getTotalOrders() {
+        $this->db->query("SELECT COUNT(*) as total FROM orders");
+        return $this->db->single()['total'];
+    }
+
+    // Get total revenue generated
+    public function getTotalRevenue() {
+        $this->db->query("SELECT SUM(total_amount) as revenue FROM orders WHERE status = 'successful'");
+        return $this->db->single()['revenue'] ?? 0;
+    }
+
+    // Get top products
+    public function getTopProducts($limit = 5) {
+        $this->db->query("
+            SELECT p.name, SUM(oi.quantity) as total_sold, SUM(oi.price * oi.quantity) as revenue
+            FROM order_items oi
+            JOIN products p ON oi.product_id = p.id
+            JOIN orders o ON oi.order_id = o.id
+            WHERE o.status = 'successful'
+            GROUP BY oi.product_id
+            ORDER BY total_sold DESC
+            LIMIT :limit
+        ");
+        $this->db->bind(':limit', $limit);
+        return $this->db->resultSet();
+    }
+
+
     // Map DB row to Order entity.
     private function mapOrder($row) {
         $order = new Order();

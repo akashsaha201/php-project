@@ -5,7 +5,7 @@
             <div class="card shadow-sm p-4">
                 <?php flash('register_success');?>
                 <h2 class="text-center mb-4">Login</h2>
-                <form action="<?php echo URLROOT; ?>/users/submitLogin" method="POST">
+                <form action="<?php echo URLROOT; ?>/users/authenticate" method="POST">
                     
                     <!-- Email -->
                     <div class="mb-3">

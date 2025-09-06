@@ -6,7 +6,7 @@
     <?php flash('delete_success');?>
     <h2 class="mb-4">Products</h2>
     <?php if(isLoggedIn() && isAdmin()): ?>
-    <a href="<?php echo URLROOT; ?>/products/add" class="btn btn-primary mb-3">Add Product</a>
+    <a href="<?php echo URLROOT; ?>/products/create" class="btn btn-primary mb-3">Add Product</a>
     <?php endif; ?>
     <table class="table table-bordered table-striped text-center align-middle">
     <thead class="table-dark">
@@ -64,7 +64,7 @@
                 <td><?php echo htmlspecialchars($product['quantity'] ?? ''); ?></td>
                 <td>
                     <a href="<?php echo URLROOT; ?>/products/edit/<?php echo $product['id']; ?>" class="btn btn-sm btn-warning m-2">Edit</a>
-                    <form action="<?php echo URLROOT; ?>/products/delete/<?php echo $product['id']; ?>" method="POST" class="d-inline">
+                    <form action="<?php echo URLROOT; ?>/products/destroy/<?php echo $product['id']; ?>" method="POST" class="d-inline">
                         <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this product?')">Delete</button>
                     </form>
                 </td>
